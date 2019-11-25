@@ -3,8 +3,8 @@ use std::collections::HashMap;
 
 
 struct Bingo {
-    tuplas_encontradas: HashMap<usize, usize>,
-    permutacoes_encontradas: HashSet<usize>,
+    tuplas_encontradas: HashMap<Vec<usize>, usize>,
+    permutacoes_encontradas: HashSet<Vec<usize>>,
     tuplas: Vec<Vec<usize>>,
     alvo_bingo: usize
 }
@@ -19,7 +19,7 @@ impl Bingo {
         for i in 1..=n {
             resultado = resultado * i;
         }
-
+        println!("Resultado do fatorial: {}", resultado);
         resultado
     }
 
@@ -39,11 +39,44 @@ impl Bingo {
         for i in 0..self.tuplas.len(){
             let mut copia = self.tuplas[i].clone();
             copia.sort();
-            
+            match self.tuplas_encontradas.get(&copia) {
+                Some(value) => {
+                    println!("Tupla já vista: {:?}", self.tuplas[i]);
+                    match self.permutacoes_encontradas.get(&self.tuplas[i]) {
+                        Some(k) => {
+                            println!("Permutação já vista: {:?}", k);
+                            continue;
+                        },
+                        None => {
+                            println!("Oh eu aqui");
+                            let total_permutacoes = value + 1;
+                            self.tuplas_encontradas.insert(self.tuplas[i].clone(), total_permutacoes);
+                            if total_permutacoes == self.alvo_bingo {
+                                resposta = copia;
+                                break;
+                            }
+                        }
+                    }
+                },
+                None => {
+                    println!("Tupla não inserida ainda: {:?}", self.tuplas[i]);
+                    self.tuplas_encontradas.insert(copia, 1);
+                    self.permutacoes_encontradas.insert(self.tuplas[i].clone());
+                }
+            }
 
         }
 
         resposta
+    }
+
+    fn roda_bingo (&mut self) {
+        let resultado = self.computa_bingo();
+        if resultado.len() == 0 {
+            println!("Não houve vencedor!");
+        } else {
+            println!("A tupla vencedora é {:?}", resultado);
+        }
     }
     
     
@@ -59,6 +92,5 @@ fn main() {
 
     let mut bingo = Bingo::new(tamanho, tuplas);
 
-
-    println!("Hello, world!");
+    bingo.roda_bingo();
 }
